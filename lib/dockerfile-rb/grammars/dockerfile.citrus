@@ -1,0 +1,16 @@
+grammar DockerfileRB::Dockerfile
+  include DockerfileRB::Basic
+
+
+  rule from_line
+    (from space from_value:(string) space? as_value:((as space string))? space? newline)* <DockerfileRB::Parser>
+  end
+
+  rule from
+    'FROM'
+  end
+
+  rule as
+    'AS'
+  end
+end

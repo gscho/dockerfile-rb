@@ -1,0 +1,13 @@
+grammar DockerfileRB::Basic
+  rule space
+    [ \t]*
+  end
+
+  rule newline
+    [\n]*
+  end
+
+  rule string
+    [a-zA-Z0-9:./@]+
+  end
+end
