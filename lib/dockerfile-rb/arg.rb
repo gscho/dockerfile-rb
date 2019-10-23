@@ -1,16 +1,14 @@
 module DockerfileRB
   class Arg
     attr_reader :name, :default_value
-    def initialize(arg)
-      @content = arg
-      @name = arg.split('=')[0]
-      @default_value = arg.split('=')[1]
+    def initialize(name, default_value)
+      @name = name
+      @default_value = default_value
     end
   end
   module ArgParser
     def value
-      as = capture(:as).value.first unless capture(:as).nil?
-      From.new(capture(:from_term), as)
+      Arg.new(capture(:arg_name), capture(:arg_value))
     end
   end
 end
