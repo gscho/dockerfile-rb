@@ -1,11 +1,15 @@
 grammar DockerfileRB::Dockerfile
   rule dockerfile
-    (from | arg | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | maintainer | user | line_break)* {
+    (from | arg | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | maintainer | user | workdir | line_break)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
       value
     }
+  end
+
+  rule workdir
+    ('WORKDIR' space quote? workdir_term:(string) quote?) <DockerfileRB::WorkdirParser>
   end
 
   rule user
@@ -47,7 +51,7 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string
-    [a-zA-Z0-9:.@/_-]+
+    [a-zA-Z0-9:.@/_\-\$\\]+
   end
 
   rule comma

@@ -1,0 +1,4 @@
+WORKDIR $DIRPATH/$DIRNAME
+WORKDIR /path/to/workdir
+WORKDIR C:\path\to\workdir
+WORKDIR b

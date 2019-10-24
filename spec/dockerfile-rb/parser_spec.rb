@@ -50,6 +50,16 @@ RSpec.describe DockerfileRB do
     expect(parsed['user'][1].group_id).to eq('admin')
   end
 
+  it "parses workdir lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.workdir', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['workdir'].size).to eq(4)
+    expect(parsed['workdir'].first.path).to eq('$DIRPATH/$DIRNAME')
+    expect(parsed['workdir'][1].path).to eq('/path/to/workdir')
+    expect(parsed['workdir'][2].path).to eq('C:\path\to\workdir')
+    expect(parsed['workdir'][3].path).to eq('b')
+  end
+
   it "parses everything at once" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile', __dir__)}")))
     expect(parsed).not_to be nil
@@ -75,5 +85,7 @@ RSpec.describe DockerfileRB do
     expect(parsed['entrypoint'].size).to eq(1)
     expect(parsed['entrypoint'].first.executable).to eq('top')
     expect(parsed['entrypoint'].first.parameters).to eq(["-b"])
+    expect(parsed['workdir'].size).to eq(1)
+    expect(parsed['workdir'].first.path).to eq('/path/to/workdir')
   end
 end

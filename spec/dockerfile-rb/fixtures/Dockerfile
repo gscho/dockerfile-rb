@@ -4,6 +4,8 @@ FROM opensuse/leap:15.0 AS test
 
 USER 0:0
 
+WORKDIR /path/to/workdir
+
 ARG TEST_ARG=0.82.0
 
 CMD ["executable","param1","param2"]
