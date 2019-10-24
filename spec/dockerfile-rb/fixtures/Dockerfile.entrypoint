@@ -1,0 +1,3 @@
+ENTRYPOINT ["executable","param1","param2"]
+
+ENTRYPOINT command param1 param2

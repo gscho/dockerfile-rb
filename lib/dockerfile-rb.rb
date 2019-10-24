@@ -1,6 +1,7 @@
 require 'citrus'
 require "dockerfile-rb/arg"
 require "dockerfile-rb/cmd"
+require "dockerfile-rb/entrypoint"
 require "dockerfile-rb/from"
 require "dockerfile-rb/maintainer"
 require "dockerfile-rb/version"

@@ -7,3 +7,6 @@ ARG TEST_ARG=0.82.0
 CMD ["executable","param1","param2"]
 
 CMD command param1 param2
+
+ENTRYPOINT ["top", "-b"]
+CMD ["-c"]

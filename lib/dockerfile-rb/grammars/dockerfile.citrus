@@ -1,11 +1,19 @@
 grammar DockerfileRB::Dockerfile
   rule document
-    (from | arg | cmd_exec | cmd_shell | maintainer | line_break)* {
+    (from | arg | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | maintainer | line_break)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
       value
     }
+  end
+
+  rule entrypoint_exec
+    ('ENTRYPOINT' space '[' (quote entrypoint_term:(string) quote comma?)* ']') <DockerfileRB::EntrypointExecParser>
+  end
+
+  rule entrypoint_shell
+    ('ENTRYPOINT' space (entrypoint_term:(string) space?)*) <DockerfileRB::EntrypointShellParser>
   end
 
   rule cmd_exec
@@ -35,15 +43,15 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string
-    [a-zA-Z0-9:.@/_]+
+    [a-zA-Z0-9:.@/_-]+
   end
 
   rule comma
-    ','
+    space? ',' space?
   end
 
   rule quote
-    '"'
+    space? '"' space?
   end
 
   rule space
