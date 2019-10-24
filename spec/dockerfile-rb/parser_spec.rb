@@ -23,6 +23,13 @@ RSpec.describe DockerfileRB do
     expect(parsed['cmd'][1].parameters).to eq(["param1","param2"])
   end
 
+  it "parses maintainer line" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.maintainer', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['maintainer'].size).to eq(1)
+    expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
+  end
+
   it "parses everything at once" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile', __dir__)}")))
     expect(parsed).not_to be nil
@@ -39,5 +46,7 @@ RSpec.describe DockerfileRB do
     expect(parsed['cmd'].first.parameters).to eq(["param1","param2"])
     expect(parsed['cmd'][1].executable).to eq('command')
     expect(parsed['cmd'][1].parameters).to eq(["param1","param2"])
+    expect(parsed['maintainer'].size).to eq(1)
+    expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
   end
 end

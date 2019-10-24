@@ -1,6 +1,6 @@
 grammar DockerfileRB::Dockerfile
   rule document
-    (from | arg | cmd_exec | cmd_shell | line_break)* {
+    (from | arg | cmd_exec | cmd_shell | maintainer | line_break)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
@@ -14,6 +14,10 @@ grammar DockerfileRB::Dockerfile
 
   rule cmd_shell
     ('CMD' space (cmd_term:(string) space?)*) <DockerfileRB::CmdShellParser>
+  end
+
+  rule maintainer
+    ('MAINTAINER' space maintainer_term:(string)) <DockerfileRB::MaintainerParser>
   end
 
   rule arg
