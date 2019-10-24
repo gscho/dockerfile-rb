@@ -4,7 +4,9 @@ require "dockerfile-rb/cmd"
 require "dockerfile-rb/entrypoint"
 require "dockerfile-rb/from"
 require "dockerfile-rb/maintainer"
+require "dockerfile-rb/user"
 require "dockerfile-rb/version"
+
 Citrus.load "#{File.expand_path('dockerfile-rb/grammars/dockerfile.citrus', __dir__)}"
 
 module DockerfileRB

@@ -1,11 +1,15 @@
 grammar DockerfileRB::Dockerfile
-  rule document
-    (from | arg | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | maintainer | line_break)* {
+  rule dockerfile
+    (from | arg | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | maintainer | user | line_break)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
       value
     }
+  end
+
+  rule user
+    ('USER' space user_term:(string)) <DockerfileRB::UserParser>
   end
 
   rule entrypoint_exec
@@ -29,7 +33,7 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule arg
-    ('ARG' space arg_name:(string) '=' arg_value:(string)) <DockerfileRB::ArgParser>
+    ('ARG' space arg_name_term:(string) '=' arg_value_term:(string)) <DockerfileRB::ArgParser>
   end
 
   rule from

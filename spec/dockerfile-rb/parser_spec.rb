@@ -33,11 +33,21 @@ RSpec.describe DockerfileRB do
     expect(parsed['entrypoint'][1].parameters).to eq(["param1","param2"])
   end
 
-  it "parses maintainer line" do
+  it "parses maintainer lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.maintainer', __dir__)}")))
     expect(parsed).not_to be nil
     expect(parsed['maintainer'].size).to eq(1)
     expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
+  end
+
+  it "parses user lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.user', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['user'].size).to eq(2)
+    expect(parsed['user'].first.user_id).to eq('0')
+    expect(parsed['user'].first.group_id).to eq('1000')
+    expect(parsed['user'][1].user_id).to eq('wheel')
+    expect(parsed['user'][1].group_id).to eq('admin')
   end
 
   it "parses everything at once" do
@@ -59,6 +69,9 @@ RSpec.describe DockerfileRB do
     expect(parsed['cmd'][2].executable).to eq('-c')
     expect(parsed['maintainer'].size).to eq(1)
     expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
+    expect(parsed['user'].size).to eq(1)
+    expect(parsed['user'].first.user_id).to eq('0')
+    expect(parsed['user'].first.group_id).to eq('0')
     expect(parsed['entrypoint'].size).to eq(1)
     expect(parsed['entrypoint'].first.executable).to eq('top')
     expect(parsed['entrypoint'].first.parameters).to eq(["-b"])

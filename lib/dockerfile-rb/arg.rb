@@ -8,7 +8,7 @@ module DockerfileRB
   end
   module ArgParser
     def value
-      Arg.new(capture(:arg_name), capture(:arg_value))
+      Arg.new(capture(:arg_name_term), capture(:arg_value_term))
     end
   end
 end
