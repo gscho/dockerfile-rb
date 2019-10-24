@@ -1,6 +1,6 @@
 grammar DockerfileRB::Dockerfile
   rule document
-    (from | arg | cmd_exec | line_break)* {
+    (from | arg | cmd_exec | cmd_shell | line_break)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
@@ -9,15 +9,19 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule cmd_exec
-    ('CMD' space '[' cmd_term:(quoted_string)* ']' line_break?) <DockerfileRB::CmdExecParser>
+    ('CMD' space '[' (quote cmd_term:(string) quote comma?)* ']') <DockerfileRB::CmdExecParser>
+  end
+
+  rule cmd_shell
+    ('CMD' space (cmd_term:(string) space?)*) <DockerfileRB::CmdShellParser>
   end
 
   rule arg
-    ('ARG' space arg_name:(string) '=' arg_value:(string) line_break?) <DockerfileRB::ArgParser>
+    ('ARG' space arg_name:(string) '=' arg_value:(string)) <DockerfileRB::ArgParser>
   end
 
   rule from
-    ('FROM' space from_term:(string) space? as* line_break?) <DockerfileRB::FromParser>
+    ('FROM' space from_term:(string) space? as?) <DockerfileRB::FromParser>
   end
 
   rule as
@@ -31,7 +35,7 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string
-    ([a-zA-Z0-9:.@/_]*)
+    [a-zA-Z0-9:.@/_]+
   end
 
   rule comma
