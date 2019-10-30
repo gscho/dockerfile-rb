@@ -1,0 +1,3 @@
+COPY --chown=wheel:admin /src /dest
+
+COPY foo bar

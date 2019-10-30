@@ -23,6 +23,22 @@ RSpec.describe DockerfileRB do
     expect(parsed['cmd'][1].parameters).to eq(["param1","param2"])
   end
 
+  it "parses copy lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.copy', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['copy'].size).to eq(2)
+    expect(parsed['copy'].first.arg).to eq('--chown')
+    expect(parsed['copy'].first.user).to eq('wheel')
+    expect(parsed['copy'].first.group).to eq('admin')
+    expect(parsed['copy'].first.src).to eq('/src')
+    expect(parsed['copy'].first.dest).to eq('/dest')
+    expect(parsed['copy'][1].arg).to eq(nil)
+    expect(parsed['copy'][1].user).to eq(nil)
+    expect(parsed['copy'][1].group).to eq(nil)
+    expect(parsed['copy'][1].src).to eq('foo')
+    expect(parsed['copy'][1].dest).to eq('bar')
+  end
+
   it "parses entrypoint lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.entrypoint', __dir__)}")))
     expect(parsed).not_to be nil
