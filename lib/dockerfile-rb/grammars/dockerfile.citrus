@@ -1,6 +1,6 @@
 grammar DockerfileRB::Dockerfile
   rule dockerfile
-    (from | arg | copy | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | maintainer | user | workdir | line_break)* {
+    (from | arg | copy | copy_with_whitespace | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | maintainer | user | workdir | line_break)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
@@ -9,7 +9,11 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule copy
-    ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space src_term:(string) space dest_term:(string) ) <DockerfileRB::CopyParser>
+    ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? src_term:(string) space dest_term:(string) ) <DockerfileRB::CopyParser>
+  end
+
+  rule copy_with_whitespace
+    ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:([a-zA-Z0-9.@/_\-\$\\ ]+) quote comma quote dest_term:([a-zA-Z0-9.@/_\-\$\\ ]+) quote ']' ) <DockerfileRB::CopyParser>
   end
 
   rule workdir
@@ -55,7 +59,7 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string
-    [a-zA-Z0-9:.@/_\-\$\\]+
+    [a-zA-Z0-9:.@/_\-\$\\\[\]]+
   end
 
   rule comma

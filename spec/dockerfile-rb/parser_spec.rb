@@ -26,7 +26,7 @@ RSpec.describe DockerfileRB do
   it "parses copy lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.copy', __dir__)}")))
     expect(parsed).not_to be nil
-    expect(parsed['copy'].size).to eq(2)
+    expect(parsed['copy'].size).to eq(3)
     expect(parsed['copy'].first.arg).to eq('--chown')
     expect(parsed['copy'].first.user).to eq('wheel')
     expect(parsed['copy'].first.group).to eq('admin')
@@ -37,6 +37,11 @@ RSpec.describe DockerfileRB do
     expect(parsed['copy'][1].group).to eq(nil)
     expect(parsed['copy'][1].src).to eq('foo')
     expect(parsed['copy'][1].dest).to eq('bar')
+    expect(parsed['copy'][2].arg).to eq('--chown')
+    expect(parsed['copy'][2].user).to eq('wheel')
+    expect(parsed['copy'][2].group).to eq('admin')
+    expect(parsed['copy'][2].src).to eq('src with whitespace')
+    expect(parsed['copy'][2].dest).to eq('dest with whitespace')
   end
 
   it "parses entrypoint lines" do
@@ -93,6 +98,17 @@ RSpec.describe DockerfileRB do
     expect(parsed['cmd'][1].executable).to eq('command')
     expect(parsed['cmd'][1].parameters).to eq(["param1","param2"])
     expect(parsed['cmd'][2].executable).to eq('-c')
+    expect(parsed['copy'].size).to eq(2)
+    expect(parsed['copy'].first.arg).to eq('--chown')
+    expect(parsed['copy'].first.user).to eq('cheese')
+    expect(parsed['copy'].first.group).to eq('bagels')
+    expect(parsed['copy'].first.src).to eq('my/src')
+    expect(parsed['copy'].first.dest).to eq('/my/dest')
+    expect(parsed['copy'][1].arg).to eq(nil)
+    expect(parsed['copy'][1].user).to eq(nil)
+    expect(parsed['copy'][1].group).to eq(nil)
+    expect(parsed['copy'][1].src).to eq('dir_one')
+    expect(parsed['copy'][1].dest).to eq('dir_two')
     expect(parsed['maintainer'].size).to eq(1)
     expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
     expect(parsed['user'].size).to eq(1)

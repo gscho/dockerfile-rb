@@ -1,3 +1,5 @@
 COPY --chown=wheel:admin /src /dest
 
 COPY foo bar
+
+COPY --chown=wheel:admin ["src with whitespace","dest with whitespace"]
