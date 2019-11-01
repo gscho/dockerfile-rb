@@ -10,6 +10,9 @@ COPY --chown=cheese:bagels my/src /my/dest
 
 COPY dir_one dir_two
 
+
+COPY --chown=wheel:admin ["src with whitespace",  "dest with whitespace"]
+
 ARG TEST_ARG=0.82.0
 
 CMD ["executable","param1","param2"]
