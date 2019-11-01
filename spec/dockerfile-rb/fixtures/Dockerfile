@@ -15,6 +15,8 @@ USER 0:0
 
 WORKDIR /path/to/workdir
 
+EXPOSE 3000/tcp
+
 COPY --chown=cheese:bagels my/src /my/dest
 
 COPY dir_one dir_two

@@ -75,6 +75,18 @@ RSpec.describe DockerfileRB do
     expect(parsed['entrypoint'][1].parameters).to eq(["param1","param2"])
   end
 
+  it "parses expose lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.expose', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['expose'].size).to eq(3)
+    expect(parsed['expose'].first.port).to eq(80)
+    expect(parsed['expose'].first.protocol).to eq('tcp')
+    expect(parsed['expose'][1].port).to eq(9631)
+    expect(parsed['expose'][1].protocol).to eq('udp')
+    expect(parsed['expose'][2].port).to eq(8080)
+    expect(parsed['expose'][2].protocol).to eq('tcp')
+  end
+
   it "parses label lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.label', __dir__)}")))
     expect(parsed).not_to be nil
@@ -172,6 +184,9 @@ RSpec.describe DockerfileRB do
     expect(parsed['entrypoint'].size).to eq(1)
     expect(parsed['entrypoint'].first.executable).to eq('top')
     expect(parsed['entrypoint'].first.parameters).to eq(["-b"])
+    expect(parsed['expose'].size).to eq(1)
+    expect(parsed['expose'].first.port).to eq(3000)
+    expect(parsed['expose'].first.protocol).to eq('tcp')
     expect(parsed['workdir'].size).to eq(1)
     expect(parsed['workdir'].first.path).to eq('/path/to/workdir')
   end

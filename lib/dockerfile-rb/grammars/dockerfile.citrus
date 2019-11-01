@@ -1,6 +1,6 @@
 grammar DockerfileRB::Dockerfile
   rule dockerfile
-    (from | arg | copy | copy_with_whitespace | add | add_with_whitespace | cmd_exec | cmd_shell | label | entrypoint_exec | entrypoint_shell | maintainer | user | workdir | line_break | line_continuation)* {
+    (from | arg | copy | copy_with_whitespace | add | add_with_whitespace | cmd_exec | cmd_shell | label | entrypoint_exec | entrypoint_shell | expose | maintainer | user | workdir | line_break | line_continuation)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
@@ -38,6 +38,10 @@ grammar DockerfileRB::Dockerfile
 
   rule entrypoint_shell
     ('ENTRYPOINT' space (entrypoint_term:(string) space?)*) <DockerfileRB::EntrypointShellParser>
+  end
+
+  rule expose
+    ('EXPOSE' space expose_term:(string)) <DockerfileRB::ExposeParser>
   end
 
   rule cmd_exec
