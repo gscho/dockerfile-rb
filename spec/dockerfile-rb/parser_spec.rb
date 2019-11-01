@@ -5,6 +5,27 @@ RSpec.describe DockerfileRB do
     expect(parsed['from'].size).to eq(4)
   end
 
+  it "parses add lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.add', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['add'].size).to eq(3)
+    expect(parsed['add'].first.arg).to eq('--chown')
+    expect(parsed['add'].first.user).to eq('wheel')
+    expect(parsed['add'].first.group).to eq('admin')
+    expect(parsed['add'].first.src).to eq('/src')
+    expect(parsed['add'].first.dest).to eq('/dest')
+    expect(parsed['add'][1].arg).to eq(nil)
+    expect(parsed['add'][1].user).to eq(nil)
+    expect(parsed['add'][1].group).to eq(nil)
+    expect(parsed['add'][1].src).to eq('foo')
+    expect(parsed['add'][1].dest).to eq('bar')
+    expect(parsed['add'][2].arg).to eq('--chown')
+    expect(parsed['add'][2].user).to eq('wheel')
+    expect(parsed['add'][2].group).to eq('admin')
+    expect(parsed['add'][2].src).to eq('src with whitespace')
+    expect(parsed['add'][2].dest).to eq('dest with whitespace')
+  end
+
   it "parses arg lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.arg', __dir__)}")))
     expect(parsed).not_to be nil
@@ -52,6 +73,16 @@ RSpec.describe DockerfileRB do
     expect(parsed['entrypoint'].first.parameters).to eq(["param1","param2"])
     expect(parsed['entrypoint'][1].executable).to eq('command')
     expect(parsed['entrypoint'][1].parameters).to eq(["param1","param2"])
+  end
+
+  it "parses label lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.label', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['label'].size).to eq(4)
+    expect(parsed['label'].first.pairs).to eq({"com.example.vendor" => "ACME Incorporated"})
+    expect(parsed['label'][1].pairs).to eq({"com.example.label-with-value" => "foo"})
+    expect(parsed['label'][2].pairs).to eq({"multi.label1" => "value1", "multi.label2" => "value2", "other" => "value3"})
+    expect(parsed['label'][3].pairs).to eq({"multi.label1" => "value1", "multi.label2" => "value2", "other" => "value3"})
   end
 
   it "parses maintainer lines" do
@@ -113,6 +144,26 @@ RSpec.describe DockerfileRB do
     expect(parsed['copy'][2].group).to eq('admin')
     expect(parsed['copy'][2].src).to eq('src with whitespace')
     expect(parsed['copy'][2].dest).to eq('dest with whitespace')
+    expect(parsed['add'].size).to eq(3)
+    expect(parsed['add'].first.arg).to eq('--chown')
+    expect(parsed['add'].first.user).to eq('cheese')
+    expect(parsed['add'].first.group).to eq('bagels')
+    expect(parsed['add'].first.src).to eq('my/src')
+    expect(parsed['add'].first.dest).to eq('/my/dest')
+    expect(parsed['add'][1].arg).to eq(nil)
+    expect(parsed['add'][1].user).to eq(nil)
+    expect(parsed['add'][1].group).to eq(nil)
+    expect(parsed['add'][1].src).to eq('dir_one')
+    expect(parsed['add'][1].dest).to eq('dir_two')
+    expect(parsed['add'][2].user).to eq('wheel')
+    expect(parsed['add'][2].group).to eq('admin')
+    expect(parsed['add'][2].src).to eq('src with whitespace')
+    expect(parsed['add'][2].dest).to eq('dest with whitespace')
+    expect(parsed['label'].size).to eq(4)
+    expect(parsed['label'].first.pairs).to eq({"com.example.vendor" => "ACME Incorporated"})
+    expect(parsed['label'][1].pairs).to eq({"com.example.label-with-value" => "foo"})
+    expect(parsed['label'][2].pairs).to eq({"multi.label1" => "value1", "multi.label2" => "value2", "other" => "value3"})
+    expect(parsed['label'][3].pairs).to eq({"multi.label1" => "value1", "multi.label2" => "value2", "other" => "value3"})
     expect(parsed['maintainer'].size).to eq(1)
     expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
     expect(parsed['user'].size).to eq(1)

@@ -1,0 +1,8 @@
+LABEL "com.example.vendor"="ACME Incorporated"
+LABEL com.example.label-with-value="foo"
+
+LABEL multi.label1="value1" multi.label2="value2" other="value3"
+
+LABEL multi.label1="value1" \
+      multi.label2="value2" \
+      other="value3"

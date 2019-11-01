@@ -1,10 +1,11 @@
 require 'citrus'
-# Dir[File.join(__dir__, 'lib', '*.rb')].each { |dep| require dep }
+require "dockerfile-rb/add"
 require "dockerfile-rb/arg"
 require "dockerfile-rb/cmd"
 require "dockerfile-rb/copy"
 require "dockerfile-rb/entrypoint"
 require "dockerfile-rb/from"
+require "dockerfile-rb/label"
 require "dockerfile-rb/maintainer"
 require "dockerfile-rb/user"
 require "dockerfile-rb/version"

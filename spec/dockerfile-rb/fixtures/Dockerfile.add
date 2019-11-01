@@ -1,0 +1,5 @@
+ADD --chown=wheel:admin /src /dest
+
+ADD foo bar
+
+ADD --chown=wheel:admin ["src with whitespace","dest with whitespace"]
