@@ -55,7 +55,7 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule env_key_value
-    ('ENV' space (key_term:(string_with_whitespace) space? '=' quote? space? value_term:(string_with_whitespace) quote? line_continuation?)+) <DockerfileRB::EnvKeyValueParser>
+    ('ENV' space (key_term:(escaped_string) space? '=' quote? space? value_term:(escaped_string) quote? line_continuation?)+) <DockerfileRB::EnvKeyValueParser>
   end
 
   rule expose
@@ -87,11 +87,15 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string
-    [a-zA-Z0-9:.@/_\-\$\[\]]+
+    [a-zA-Z0-9:.@/_\-\$\[\]$]+
   end
 
   rule string_with_whitespace
-    (escape? [a-zA-Z0-9:.@/_\-\$ ]+ escape?)+
+    [a-zA-Z0-9:.@/_\-\$\[\]$ ]+
+  end
+
+  rule escaped_string
+    (escape? string_with_whitespace escape?)+
   end
 
   rule comma
