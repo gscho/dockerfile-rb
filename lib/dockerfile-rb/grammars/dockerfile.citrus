@@ -1,10 +1,28 @@
 grammar DockerfileRB::Dockerfile
   rule dockerfile
-    (from | arg | copy | copy_with_whitespace | add | add_with_whitespace | cmd_exec | cmd_shell | label | entrypoint_exec | entrypoint_shell | expose | maintainer | user | workdir | line_break | line_continuation)* {
+    (add | add_with_whitespace | arg | copy | copy_with_whitespace | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | env_with_whitespace | env_key_value | expose | from | label | maintainer | user | workdir | line_break)* {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
       value
+    }
+  end
+
+  rule add
+    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? src_term:(string) space dest_term:(string) ) <DockerfileRB::AddParser>
+  end
+
+  rule add_with_whitespace
+    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:(string_with_whitespace) quote comma quote dest_term:(string_with_whitespace) quote ']' ) <DockerfileRB::AddParser>
+  end
+
+  rule arg
+    ('ARG' space arg_name_term:(string) '=' arg_value_term:(string)) <DockerfileRB::ArgParser>
+  end
+
+  rule as
+    ('AS' space as_term:(string)) {
+      captures(:as_term)
     }
   end
 
@@ -16,20 +34,12 @@ grammar DockerfileRB::Dockerfile
     ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:(string_with_whitespace) quote comma quote dest_term:(string_with_whitespace) quote ']' ) <DockerfileRB::CopyParser>
   end
 
-  rule add
-    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? src_term:(string) space dest_term:(string) ) <DockerfileRB::AddParser>
+  rule cmd_exec
+    ('CMD' space '[' (quote cmd_term:(string) quote comma?)* ']') <DockerfileRB::CmdExecParser>
   end
 
-  rule add_with_whitespace
-    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:(string_with_whitespace) quote comma quote dest_term:(string_with_whitespace) quote ']' ) <DockerfileRB::AddParser>
-  end
-
-  rule workdir
-    ('WORKDIR' space quote? workdir_term:(string) quote?) <DockerfileRB::WorkdirParser>
-  end
-
-  rule user
-    ('USER' space user_term:(string)) <DockerfileRB::UserParser>
+  rule cmd_shell
+    ('CMD' space (cmd_term:(string) space?)*) <DockerfileRB::CmdShellParser>
   end
 
   rule entrypoint_exec
@@ -40,16 +50,20 @@ grammar DockerfileRB::Dockerfile
     ('ENTRYPOINT' space (entrypoint_term:(string) space?)*) <DockerfileRB::EntrypointShellParser>
   end
 
+  rule env_with_whitespace
+    ('ENV' space key_term:(string) space value_term:(string_with_whitespace)) <DockerfileRB::EnvWhitespaceParser>
+  end
+
+  rule env_key_value
+    ('ENV' space (key_term:(string_with_whitespace) space? '=' quote? space? value_term:(string_with_whitespace) quote? line_continuation?)+) <DockerfileRB::EnvKeyValueParser>
+  end
+
   rule expose
     ('EXPOSE' space expose_term:(string)) <DockerfileRB::ExposeParser>
   end
 
-  rule cmd_exec
-    ('CMD' space '[' (quote cmd_term:(string) quote comma?)* ']') <DockerfileRB::CmdExecParser>
-  end
-
-  rule cmd_shell
-    ('CMD' space (cmd_term:(string) space?)*) <DockerfileRB::CmdShellParser>
+  rule from
+    ('FROM' space from_term:(string) space? as?) <DockerfileRB::FromParser>
   end
 
   rule label
@@ -60,30 +74,32 @@ grammar DockerfileRB::Dockerfile
     ('MAINTAINER' space maintainer_term:(string)) <DockerfileRB::MaintainerParser>
   end
 
-  rule arg
-    ('ARG' space arg_name_term:(string) '=' arg_value_term:(string)) <DockerfileRB::ArgParser>
+  rule user
+    ('USER' space user_term:(string)) <DockerfileRB::UserParser>
   end
 
-  rule from
-    ('FROM' space from_term:(string) space? as?) <DockerfileRB::FromParser>
+  rule workdir
+    ('WORKDIR' space quote? workdir_term:(path) quote?) <DockerfileRB::WorkdirParser>
   end
 
-  rule as
-    ('AS' space as_term:(string)) {
-      captures(:as_term)
-    }
+  rule path
+    [a-zA-Z0-9:.@/_\-\$\[\]\\]+
   end
 
   rule string
-    [a-zA-Z0-9:.@/_\-\$\\\[\]]+
+    [a-zA-Z0-9:.@/_\-\$\[\]]+
   end
 
   rule string_with_whitespace
-    [a-zA-Z0-9:.@/_\-\$\\ ]+
+    [a-zA-Z0-9:.@/_\-\$ ]+
   end
 
   rule comma
     space? ',' space?
+  end
+
+  rule escape
+    ('\\' &' ')*
   end
 
   rule quote

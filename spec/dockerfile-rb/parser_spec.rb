@@ -75,6 +75,15 @@ RSpec.describe DockerfileRB do
     expect(parsed['entrypoint'][1].parameters).to eq(["param1","param2"])
   end
 
+  it "parses env lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.env', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['env'].size).to eq(3)
+    expect(parsed['env'].first.pairs).to eq({"myDog"=>"Rex The Dog"})
+    expect(parsed['env'][1].pairs).to eq({"myCat" => "fluffy"})
+    expect(parsed['env'][2].pairs).to eq({"myName" => "John Doe", "myDog"=>"Rex The Dog", "myCat" => "fluffy"})
+  end
+
   it "parses expose lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.expose', __dir__)}")))
     expect(parsed).not_to be nil
