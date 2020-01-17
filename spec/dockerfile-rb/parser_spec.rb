@@ -81,7 +81,7 @@ RSpec.describe DockerfileRB do
     expect(parsed['env'].size).to eq(3)
     expect(parsed['env'].first.pairs).to eq({"myDog"=>"Rex The Dog"})
     expect(parsed['env'][1].pairs).to eq({"myCat" => "fluffy"})
-    expect(parsed['env'][2].pairs).to eq({"myName" => "John Doe", "myDog"=>"Rex The Dog", "myCat" => "fluffy"})
+    expect(parsed['env'][2].pairs).to eq({"myName" => "John Doe", "myDog"=>"Rex\\ The\\ Dog", "myCat" => "fluffy"})
   end
 
   it "parses expose lines" do

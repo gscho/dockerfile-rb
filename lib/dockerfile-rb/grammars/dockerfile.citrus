@@ -91,7 +91,7 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string_with_whitespace
-    [a-zA-Z0-9:.@/_\-\$ ]+
+    (escape? [a-zA-Z0-9:.@/_\-\$ ]+ escape?)+
   end
 
   rule comma
