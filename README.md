@@ -1,5 +1,7 @@
 # DockerfileRB
 
+![](https://github.com/gscho/dockerfile-rb/workflows/.github/workflows/ruby.yml/badge.svg)
+    
 The intent of this gem is to use a PEG (citrus) to parse a Dockerfile into a Ruby object .
 
 ## Installation
