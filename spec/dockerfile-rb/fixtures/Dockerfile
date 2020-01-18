@@ -37,3 +37,9 @@ CMD command param1 param2
 
 ENTRYPOINT ["top", "-b"]
 CMD ["-c"]
+
+ENV myDog Rex The Dog
+ENV myCat fluffy
+
+ENV myName="John Doe" myDog=Rex\ The\ Dog \
+    myCat=fluffy

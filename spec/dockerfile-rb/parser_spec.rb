@@ -198,5 +198,9 @@ RSpec.describe DockerfileRB do
     expect(parsed['expose'].first.protocol).to eq('tcp')
     expect(parsed['workdir'].size).to eq(1)
     expect(parsed['workdir'].first.path).to eq('/path/to/workdir')
+    expect(parsed['env'].size).to eq(3)
+    expect(parsed['env'].first.pairs).to eq({"myDog"=>"Rex The Dog"})
+    expect(parsed['env'][1].pairs).to eq({"myCat" => "fluffy"})
+    expect(parsed['env'][2].pairs).to eq({"myName" => "John Doe", "myDog"=>"Rex\\ The\\ Dog", "myCat" => "fluffy"})
   end
 end
