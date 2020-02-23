@@ -13,6 +13,8 @@ FROM opensuse/leap:15.0 AS test
 
 USER 0:0
 
+STOPSIGNAL SIGTERM
+
 WORKDIR /path/to/workdir
 
 EXPOSE 3000/tcp

@@ -113,6 +113,14 @@ RSpec.describe DockerfileRB do
     expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
   end
 
+  it "parses stopsignal lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.stopsignal', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['stopsignal'].size).to eq(2)
+    expect(parsed['stopsignal'].first.signal).to eq('9')
+    expect(parsed['stopsignal'][1].signal).to eq('SIGKILL')
+  end
+
   it "parses user lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.user', __dir__)}")))
     expect(parsed).not_to be nil
@@ -187,6 +195,8 @@ RSpec.describe DockerfileRB do
     expect(parsed['label'][3].pairs).to eq({"multi.label1" => "value1", "multi.label2" => "value2", "other" => "value3"})
     expect(parsed['maintainer'].size).to eq(1)
     expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
+    expect(parsed['stopsignal'].size).to eq(1)
+    expect(parsed['stopsignal'].first.signal).to eq('SIGTERM')
     expect(parsed['user'].size).to eq(1)
     expect(parsed['user'].first.user_id).to eq('0')
     expect(parsed['user'].first.group_id).to eq('0')

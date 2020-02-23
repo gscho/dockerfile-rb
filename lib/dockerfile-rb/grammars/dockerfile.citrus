@@ -1,6 +1,22 @@
 grammar DockerfileRB::Dockerfile
   rule dockerfile
-    (add | add_with_whitespace | arg | copy | copy_with_whitespace | cmd_exec | cmd_shell | entrypoint_exec | entrypoint_shell | env_with_whitespace | env_key_value | expose | from | label | maintainer | user | workdir | line_break)* {
+    (
+      add | add_with_whitespace |
+      arg |
+      copy | copy_with_whitespace |
+      cmd_exec | cmd_shell |
+      entrypoint_exec | entrypoint_shell |
+      env_with_whitespace | env_key_value |
+      expose |
+      from |
+      label |
+      maintainer |
+      stopsignal |
+      user |
+      workdir |
+      line_break
+    )*
+    {
       parsed = matches.map(&:value).compact
       value = Hash.new {|h,k| h[k] = [] }
       parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
@@ -74,6 +90,10 @@ grammar DockerfileRB::Dockerfile
     ('MAINTAINER' space maintainer_term:(string)) <DockerfileRB::MaintainerParser>
   end
 
+  rule stopsignal
+    ('STOPSIGNAL' space signal_term:(signal)) <DockerfileRB::StopsignalParser>
+  end
+
   rule user
     ('USER' space user_term:(string)) <DockerfileRB::UserParser>
   end
@@ -124,5 +144,9 @@ grammar DockerfileRB::Dockerfile
 
   rule line_break
     (space? "\n" | space? "\r\n") { nil }
+  end
+
+  rule signal
+    [\d] | "SIG"[A-Z]+
   end
 end
