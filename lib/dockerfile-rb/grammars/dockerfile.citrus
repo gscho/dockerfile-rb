@@ -1,6 +1,7 @@
 grammar DockerfileRB::Dockerfile
   rule dockerfile
     (
+      comment |
       add | add_with_whitespace |
       arg |
       copy | copy_with_whitespace |
@@ -12,6 +13,8 @@ grammar DockerfileRB::Dockerfile
       from |
       label |
       maintainer |
+      run_exec |
+      run_shell |
       stopsignal |
       user |
       volume_json |
@@ -43,6 +46,10 @@ grammar DockerfileRB::Dockerfile
     ('AS' space as_term:(string)) {
       captures(:as_term)
     }
+  end
+
+  rule comment
+    '#' space? (string_with_whitespace | '\'' | '=' | '"')* line_break
   end
 
   rule copy
@@ -97,6 +104,14 @@ grammar DockerfileRB::Dockerfile
     ('MAINTAINER' space maintainer_term:(string)) <DockerfileRB::MaintainerParser>
   end
 
+  rule run_exec
+    ('RUN' space '[' (quote run_term:(string_with_whitespace) quote comma?)* ']') <DockerfileRB::RunExecParser>
+  end
+
+  rule run_shell
+    ('RUN' space (run_term:(run_string) space? line_continuation? (comment)*)*) <DockerfileRB::RunShellParser>
+  end
+
   rule stopsignal
     ('STOPSIGNAL' space signal_term:(signal)) <DockerfileRB::StopsignalParser>
   end
@@ -122,15 +137,19 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string
-    [a-zA-Z0-9:.@/_\-\$\[\]\|$]+
+    [a-zA-Z0-9:;!#<>*&^,(){}+#.@/_\-\$\[\]\|$?]+
   end
 
   rule string_with_whitespace
-    [a-zA-Z0-9:.@/_\-\$\[\]\|$ ]+
+    (string | ' ')+
   end
 
   rule escaped_string
     (escape? string_with_whitespace escape?)+
+  end
+
+  rule run_string
+    [a-zA-Z0-9:;!#<>*&^,(){}+#.@/_\-\$\[\]\|$ ='"?]+ | '\\'
   end
 
   rule comma

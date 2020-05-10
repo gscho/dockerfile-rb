@@ -1,6 +1,8 @@
 MAINTAINER greg.c.schofield@gmail.com
 
 LABEL "com.example.vendor"="ACME Incorporated"
+# Comment
+# Comment2
 LABEL com.example.label-with-value="foo"
 
 LABEL multi.label1="value1" multi.label2="value2" other="value3"
@@ -47,3 +49,12 @@ ENV myName="John Doe" myDog=Rex\ The\ Dog \
     myCat=fluffy
 VOLUME ["/var/log", "/data"]
 HEALTHCHECK NONE
+
+RUN set -eux; \
+  groupadd -r postgres --gid=999; \
+# https://salsa.debian.org/postgresql/postgresql-common/blob/997d842ee744687d99a2b2d95c1083a2615c79e8/debian/postgresql-common.postinst#L32-35
+  useradd -r -g postgres --uid=999 --home-dir=/var/lib/postgresql --shell=/bin/bash postgres; \
+# also create the postgres user's home directory with appropriate permissions
+# see https://github.com/docker-library/postgres/issues/274
+  mkdir -p /var/lib/postgresql; \
+  chown -R postgres:postgres /var/lib/postgresql

@@ -120,6 +120,15 @@ RSpec.describe DockerfileRB do
     expect(parsed['maintainer'].first.name).to eq('greg.c.schofield@gmail.com')
   end
 
+  it "parses run lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.run', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['run'].size).to eq(2)
+    expect(parsed['run'].first.executable).to eq('/bin/bash')
+    expect(parsed['run'].first.parameters).to eq(["-c","echo hello"])
+    expect(parsed['run'][1].command).to eq("set -ex; if ! command -v gpg > /dev/null; then apt-get update; apt-get install -y --no-install-recommends gnupg dirmngr ; rm -rf /var/lib/apt/lists/*; fi")
+  end
+
   it "parses stopsignal lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.stopsignal', __dir__)}")))
     expect(parsed).not_to be nil
@@ -233,5 +242,6 @@ RSpec.describe DockerfileRB do
     expect(parsed['volume'].first.directories.first).to eq('/var/log')
     expect(parsed['volume'].first.directories[1]).to eq('/data')
     expect(parsed['healthcheck'].first.none).to eq(true)
+    expect(parsed['run'].first.command).to eq('set -eux; groupadd -r postgres --gid=999; useradd -r -g postgres --uid=999 --home-dir=/var/lib/postgresql --shell=/bin/bash postgres; mkdir -p /var/lib/postgresql; chown -R postgres:postgres /var/lib/postgresql')
   end
 end
