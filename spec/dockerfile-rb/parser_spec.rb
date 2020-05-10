@@ -96,6 +96,13 @@ RSpec.describe DockerfileRB do
     expect(parsed['expose'][2].protocol).to eq('tcp')
   end
 
+  it "parses healthcheck lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.healthcheck', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['healthcheck'].size).to eq(1)
+    expect(parsed['healthcheck'].first.none).to eq(true)
+  end
+
   it "parses label lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.label', __dir__)}")))
     expect(parsed).not_to be nil
@@ -129,6 +136,17 @@ RSpec.describe DockerfileRB do
     expect(parsed['user'].first.group_id).to eq('1000')
     expect(parsed['user'][1].user_id).to eq('wheel')
     expect(parsed['user'][1].group_id).to eq('admin')
+  end
+
+  it "parses volume lines" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.volume', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['volume'].size).to eq(3)
+    expect(parsed['volume'].first.directories.first).to eq('/var/log')
+    expect(parsed['volume'].first.directories[1]).to eq('/data')
+    expect(parsed['volume'][1].directories.first).to eq('/etc/config')
+    expect(parsed['volume'][2].directories.first).to eq('/var/log')
+    expect(parsed['volume'][2].directories[1]).to eq('/data')
   end
 
   it "parses workdir lines" do
@@ -212,5 +230,8 @@ RSpec.describe DockerfileRB do
     expect(parsed['env'].first.pairs).to eq({"myDog"=>"Rex The Dog"})
     expect(parsed['env'][1].pairs).to eq({"myCat" => "fluffy"})
     expect(parsed['env'][2].pairs).to eq({"myName" => "John Doe", "myDog"=>"Rex\\ The\\ Dog", "myCat" => "fluffy"})
+    expect(parsed['volume'].first.directories.first).to eq('/var/log')
+    expect(parsed['volume'].first.directories[1]).to eq('/data')
+    expect(parsed['healthcheck'].first.none).to eq(true)
   end
 end

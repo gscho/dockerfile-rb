@@ -45,3 +45,5 @@ ENV myCat fluffy
 
 ENV myName="John Doe" myDog=Rex\ The\ Dog \
     myCat=fluffy
+VOLUME ["/var/log", "/data"]
+HEALTHCHECK NONE

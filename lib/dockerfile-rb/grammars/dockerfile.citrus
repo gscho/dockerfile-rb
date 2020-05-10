@@ -8,11 +8,14 @@ grammar DockerfileRB::Dockerfile
       entrypoint_exec | entrypoint_shell |
       env_with_whitespace | env_key_value |
       expose |
+      healthcheck_none |
       from |
       label |
       maintainer |
       stopsignal |
       user |
+      volume_json |
+      volume_string |
       workdir |
       line_break
     )*
@@ -51,11 +54,11 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule cmd_exec
-    ('CMD' space '[' (quote cmd_term:(string) quote comma?)* ']') <DockerfileRB::CmdExecParser>
+    ('CMD' space '[' (quote cmd_term:(string) quote comma?)* ']') <DockerfileRB::CmdParser>
   end
 
   rule cmd_shell
-    ('CMD' space (cmd_term:(string) space?)*) <DockerfileRB::CmdShellParser>
+    ('CMD' space (cmd_term:(string) space?)*) <DockerfileRB::CmdParser>
   end
 
   rule entrypoint_exec
@@ -78,6 +81,10 @@ grammar DockerfileRB::Dockerfile
     ('EXPOSE' space expose_term:(string)) <DockerfileRB::ExposeParser>
   end
 
+  rule healthcheck_none
+    'HEALTHCHECK NONE' <DockerfileRB::HealthcheckNoneParser>
+  end
+
   rule from
     ('FROM' space from_term:(string) space? as?) <DockerfileRB::FromParser>
   end
@@ -98,6 +105,14 @@ grammar DockerfileRB::Dockerfile
     ('USER' space user_term:(string)) <DockerfileRB::UserParser>
   end
 
+  rule volume_string
+    ('VOLUME' space (volume_term:(string) space?)* (']')?) <DockerfileRB::VolumeStringParser>
+  end
+
+  rule volume_json
+    ('VOLUME' space '[' (quote volume_term:(string) quote comma?)* ']') <DockerfileRB::VolumeJSONParser>
+  end
+
   rule workdir
     ('WORKDIR' space quote? workdir_term:(path) quote?) <DockerfileRB::WorkdirParser>
   end
@@ -107,11 +122,11 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule string
-    [a-zA-Z0-9:.@/_\-\$\[\]$]+
+    [a-zA-Z0-9:.@/_\-\$\[\]\|$]+
   end
 
   rule string_with_whitespace
-    [a-zA-Z0-9:.@/_\-\$\[\]$ ]+
+    [a-zA-Z0-9:.@/_\-\$\[\]\|$ ]+
   end
 
   rule escaped_string

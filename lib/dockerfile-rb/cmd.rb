@@ -6,13 +6,7 @@ module DockerfileRB
       @parameters = parameters
     end
   end
-  module CmdExecParser
-    def value
-      cmd = captures(:cmd_term)
-      Cmd.new(cmd[0], cmd[1..-1])
-    end
-  end
-  module CmdShellParser
+  module CmdParser
     def value
       cmd = captures(:cmd_term)
       Cmd.new(cmd[0], cmd[1..-1])

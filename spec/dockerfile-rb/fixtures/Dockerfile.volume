@@ -1,0 +1,5 @@
+VOLUME ["/var/log", "/data"]
+
+VOLUME /etc/config
+
+VOLUME /var/log /data
