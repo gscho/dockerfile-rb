@@ -2,7 +2,7 @@
 
 ![](https://github.com/gscho/dockerfile-rb/workflows/Rake%20Test/badge.svg)
     
-The intent of this gem is to use a PEG (citrus) to parse a Dockerfile into a Ruby object .
+The intent of this gem is to use a PEG (citrus) to parse a Dockerfile into a hash of Ruby objects.
 
 ## Installation
 
@@ -27,7 +27,8 @@ Example usage:
 ```
 require 'dockerfile-rb'
 
-dockerfile = DockerfileRB.parse('/path/to/Dockerfile')
+dockerfile = DockerfileRB.parse(File.read('/path/to/Dockerfile'))
+puts dockerfile.inspect
 ```
 
 ## Contributing
