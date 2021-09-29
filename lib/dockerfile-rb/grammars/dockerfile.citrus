@@ -24,22 +24,27 @@ grammar DockerfileRB::Dockerfile
     )*
     {
       parsed = matches.map(&:value).compact
-      value = Hash.new {|h,k| h[k] = [] }
-      parsed.each{|p| value[p.class.name.split('::').last.downcase].push p }
-      value
+      results = Hash.new {|h,k| h[k] = [] }
+      parsed.each do |p|
+        key = p.class.name.split('::').last.downcase
+        next if key.eql?('string')
+
+        results[key].push p
+      end
+      results
     }
   end
 
   rule add
-    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? src_term:(string) space dest_term:(string) ) <DockerfileRB::AddParser>
+    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? src_term:(string | variable) space dest_term:(string | variable) comment?) <DockerfileRB::AddParser>
   end
 
   rule add_with_whitespace
-    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:(string_with_whitespace) quote comma quote dest_term:(string_with_whitespace) quote ']' ) <DockerfileRB::AddParser>
+    ('ADD' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:(string_with_whitespace | variable) quote comma quote dest_term:(string_with_whitespace | variable) quote ']' comment?) <DockerfileRB::AddParser>
   end
 
   rule arg
-    ('ARG' space arg_name_term:(string) '=' arg_value_term:(string)) <DockerfileRB::ArgParser>
+    ('ARG' space arg_name_term:(string) '=' arg_value_term:(string) comment?) <DockerfileRB::ArgParser>
   end
 
   rule as
@@ -48,32 +53,28 @@ grammar DockerfileRB::Dockerfile
     }
   end
 
-  rule comment
-    '#' space? (string_with_whitespace | '\'' | '=' | '"')* line_break
-  end
-
   rule copy
-    ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? src_term:(string) space dest_term:(string) ) <DockerfileRB::CopyParser>
+    ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? src_term:(string | variable) space dest_term:(string | variable) comment?) <DockerfileRB::CopyParser>
   end
 
   rule copy_with_whitespace
-    ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:(string_with_whitespace) quote comma quote dest_term:(string_with_whitespace) quote ']' ) <DockerfileRB::CopyParser>
+    ('COPY' space arg_term:('--chown=' [a-zA-Z0-9.@/_\-\$\\]+ ':' [a-zA-Z0-9:.@/_\-\$\\]+)? space? '[' quote src_term:(string_with_whitespace | variable) quote comma quote dest_term:(string_with_whitespace | variable) quote ']' comment?) <DockerfileRB::CopyParser>
   end
 
   rule cmd_exec
-    ('CMD' space '[' (quote cmd_term:(string) quote comma?)* ']') <DockerfileRB::CmdParser>
+    ('CMD' space '[' (quote cmd_term:(string) quote comma?)* ']' comment?) <DockerfileRB::CmdParser>
   end
 
   rule cmd_shell
-    ('CMD' space (cmd_term:(string) space?)*) <DockerfileRB::CmdParser>
+    ('CMD' space (cmd_term:(string) space?)* comment?) <DockerfileRB::CmdParser>
   end
 
   rule entrypoint_exec
-    ('ENTRYPOINT' space '[' (quote entrypoint_term:(string) quote comma?)* ']') <DockerfileRB::EntrypointExecParser>
+    ('ENTRYPOINT' space '[' (quote entrypoint_term:(string) quote comma?)* ']' comment?) <DockerfileRB::EntrypointExecParser>
   end
 
   rule entrypoint_shell
-    ('ENTRYPOINT' space (entrypoint_term:(string) space?)*) <DockerfileRB::EntrypointShellParser>
+    ('ENTRYPOINT' space (entrypoint_term:(string) space?)* comment?) <DockerfileRB::EntrypointShellParser>
   end
 
   rule env_with_whitespace
@@ -81,64 +82,69 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule env_key_value
-    ('ENV' space (key_term:(escaped_string) space? '=' quote? space? value_term:(escaped_string) quote? line_continuation?)+) <DockerfileRB::EnvKeyValueParser>
+    ('ENV' space (key_term:(escaped_string) space? '=' quote? space? value_term:(escaped_string | variable) quote? line_continuation?)+ comment?) <DockerfileRB::EnvKeyValueParser>
   end
 
   rule expose
-    ('EXPOSE' space expose_term:(string)) <DockerfileRB::ExposeParser>
+    ('EXPOSE' space expose_term:(string | variable) comment?) <DockerfileRB::ExposeParser>
   end
 
   rule healthcheck_none
-    'HEALTHCHECK NONE' <DockerfileRB::HealthcheckNoneParser>
+    ('HEALTHCHECK NONE' comment?) <DockerfileRB::HealthcheckNoneParser>
   end
 
   rule from
-    ('FROM' space from_term:(string) space? as?) <DockerfileRB::FromParser>
+    ('FROM' space from_term:(string | variable) space? as? comment?) <DockerfileRB::FromParser>
   end
 
   rule label
-    ('LABEL' space label_term:(quote? string_with_whitespace quote? '=' quote? string_with_whitespace quote? line_continuation?)+) <DockerfileRB::LabelParser>
+    ('LABEL' space label_term:(quote? string_with_whitespace quote? '=' quote? (string_with_whitespace | variable) quote? line_continuation?)+ comment?) <DockerfileRB::LabelParser>
   end
 
   rule maintainer
-    ('MAINTAINER' space maintainer_term:(string)) <DockerfileRB::MaintainerParser>
+    ('MAINTAINER' space maintainer_term:(string) comment?) <DockerfileRB::MaintainerParser>
   end
 
   rule run_exec
-    ('RUN' space '[' (quote run_term:(string_with_whitespace) quote comma?)* ']') <DockerfileRB::RunExecParser>
+    ('RUN' space '[' (quote run_term:(string_with_whitespace) quote comma?)* ']' comment?) <DockerfileRB::RunExecParser>
   end
 
   rule run_shell
-    ('RUN' space (run_term:(run_string) space? line_continuation? (comment)*)*) <DockerfileRB::RunShellParser>
+    ('RUN' space (run_term:(run_string) space? line_continuation? (comment)*)* comment?) <DockerfileRB::RunShellParser>
   end
 
   rule stopsignal
-    ('STOPSIGNAL' space signal_term:(signal)) <DockerfileRB::StopsignalParser>
+    ('STOPSIGNAL' space signal_term:(signal | variable) comment?) <DockerfileRB::StopsignalParser>
   end
 
   rule user
-    ('USER' space user_term:(string)) <DockerfileRB::UserParser>
+    ('USER' space user_term:(string | variable) comment?) <DockerfileRB::UserParser>
   end
 
   rule volume_string
-    ('VOLUME' space (volume_term:(string) space?)* (']')?) <DockerfileRB::VolumeStringParser>
+    ('VOLUME' space (volume_term:(string | variable) space?)* (']')?) <DockerfileRB::VolumeStringParser>
   end
 
   rule volume_json
-    ('VOLUME' space '[' (quote volume_term:(string) quote comma?)* ']') <DockerfileRB::VolumeJSONParser>
+    ('VOLUME' space '[' (quote volume_term:(string | variable) quote comma?)* ']') <DockerfileRB::VolumeJSONParser>
   end
 
   rule workdir
-    ('WORKDIR' space quote? workdir_term:(path) quote?) <DockerfileRB::WorkdirParser>
+    ('WORKDIR' space quote? workdir_term:(path | variable) quote? comment?) <DockerfileRB::WorkdirParser>
+  end
+
+  rule comment
+    (space? "#" (~line_break)* line_break?)
   end
 
   rule path
-    [a-zA-Z0-9:.@/_\-\$\[\]\\]+
+    [a-zA-Z0-9:.@/_\-\$\[\]\\{}]+
   end
 
   rule string
-    [a-zA-Z0-9:;!#<>*&^,(){}+#.@/_\-\$\[\]\|$?]+
+    [a-zA-Z0-9:;!<>*&^,()+.@/_\-\[\]\|\?{}]+
   end
+
 
   rule string_with_whitespace
     (string | ' ')+
@@ -149,7 +155,11 @@ grammar DockerfileRB::Dockerfile
   end
 
   rule run_string
-    [a-zA-Z0-9:;!#<>*&^,(){}+#.@/_\-\$\[\]\|$ ='"?]+ | '\\'
+    [a-zA-Z0-9:;!#<>*&^,()+#.@/_\-\$\[\]\| ='"?{}%]+ | '\\'
+  end
+
+  rule variable
+    /^(\\\$|\$)/ string
   end
 
   rule comma

@@ -1,4 +1,32 @@
 RSpec.describe DockerfileRB do
+  it "parses postgresql" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.postgres', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['from'].size).to eq(1)
+    expect(parsed['run'].size).to eq(6)
+    expect(parsed['env'].size).to eq(5)
+    expect(parsed['volume'].size).to eq(1)
+    expect(parsed['copy'].size).to eq(1)
+    expect(parsed['entrypoint'].size).to eq(1)
+    expect(parsed['stopsignal'].size).to eq(1)
+    expect(parsed['expose'].size).to eq(1)
+    expect(parsed['cmd'].size).to eq(1)
+  end
+
+  it "parses redis" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.redis', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['from'].size).to eq(1)
+    expect(parsed['run'].size).to eq(4)
+    expect(parsed['env'].size).to eq(4)
+    expect(parsed['volume'].size).to eq(1)
+    expect(parsed['workdir'].size).to eq(1)
+    expect(parsed['copy'].size).to eq(1)
+    expect(parsed['entrypoint'].size).to eq(1)
+    expect(parsed['expose'].size).to eq(1)
+    expect(parsed['cmd'].size).to eq(1)
+  end
+
   it "parses from lines" do
     parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.from', __dir__)}")))
     expect(parsed).not_to be nil
@@ -166,6 +194,37 @@ RSpec.describe DockerfileRB do
     expect(parsed['workdir'][1].path).to eq('/path/to/workdir')
     expect(parsed['workdir'][2].path).to eq('C:\path\to\workdir')
     expect(parsed['workdir'][3].path).to eq('b')
+  end
+
+  it "parses variables" do
+    parsed = DockerfileRB.parse((File.read("#{File.expand_path('fixtures/Dockerfile.variables', __dir__)}")))
+    expect(parsed).not_to be nil
+    expect(parsed['add'].size).to eq(1)
+    expect(parsed['add'].first.src).to eq('.')
+    expect(parsed['add'].first.dest).to eq('$FOO')
+    expect(parsed['copy'].size).to eq(1)
+    expect(parsed['copy'].first.src).to eq('\$FOO')
+    expect(parsed['copy'].first.dest.to_s).to eq('/quux')
+    expect(parsed['env'].size).to eq(6)
+    expect(parsed['env'].last.pairs).to eq({"BAZ"=>"${FOO}"})
+    expect(parsed['expose'].size).to eq(1)
+    expect(parsed['expose'].first.port).to eq('$PORT')
+    expect(parsed['expose'].first.protocol).to eq(nil)
+    expect(parsed['from'].size).to eq(1)
+    expect(parsed['from'].first.image).to eq('$FROM_VAR')
+    expect(parsed['from'].first.image_tag).to eq(nil)
+    expect(parsed['from'].first.image_digest).to eq(nil)
+    expect(parsed['label'].size).to eq(1)
+    expect(parsed['label'].first.pairs).to eq({"x" => "$FOO"})
+    expect(parsed['stopsignal'].size).to eq(1)
+    expect(parsed['stopsignal'].first.signal).to eq('\\$SIG')
+    expect(parsed['user'].size).to eq(1)
+    expect(parsed['user'].first.user_id).to eq('$USER')
+    expect(parsed['user'].first.group_id).to eq(nil)
+    expect(parsed['volume'].size).to eq(1)
+    expect(parsed['volume'].first.directories.first).to eq('${FOO}')
+    expect(parsed['workdir'].size).to eq(1)
+    expect(parsed['workdir'].first.path).to eq('${FOO}')
   end
 
   it "parses everything at once" do
