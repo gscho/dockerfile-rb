@@ -1,0 +1,15 @@
+ENV FOO=/bar
+ENV PORT=8080
+ENV FROM_VAR=ubuntu:latest
+ENV SIG=9
+ENV USER=wheel:admin
+ADD . $FOO       # ADD . /bar
+COPY \$FOO /quux # COPY $FOO /quux
+ENV BAZ=${FOO}   # ENV BAZ=/bar
+EXPOSE $PORT     # EXPOSE 8080
+FROM $FROM_VAR   # FROM ubuntu:latest
+LABEL x=\$FOO    # LABEL FOO
+STOPSIGNAL \$SIG # STOPSIG 9
+USER $USER       # USER wheel:admin
+VOLUME ${FOO}    # VOLUME /bar
+WORKDIR ${FOO}   # WORKDIR /bar
